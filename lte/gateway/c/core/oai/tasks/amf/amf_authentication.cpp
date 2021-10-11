@@ -621,11 +621,14 @@ void amf_ctx_clear_auth_vectors(amf_context_t* const ctxt) {
 
 int amf_auth_auth_rej(amf_ue_ngap_id_t ue_id) {
   int rc                               = RETURNerror;
+  ue_m5gmm_context_s* ue_mm_context    = NULL;
   amf_sap_t amf_sap                    = {};
   amf_sap.primitive                    = AMFAS_SECURITY_REJ;
   amf_sap.u.amf_as.u.security.ue_id    = ue_id;
   amf_sap.u.amf_as.u.security.msg_type = AMF_AS_MSG_TYPE_AUTH;
   rc                                   = amf_sap_send(&amf_sap);
+  ue_mm_context = amf_ue_context_exists_amf_ue_ngap_id(ue_id);
+  amf_free_ue_context(ue_mm_context);
   return rc;
 }
 
@@ -666,7 +669,6 @@ int amf_proc_authentication_failure(
   ue_m5gmm_context_s* ue_mm_context = NULL;
   amf_context_t* amf_ctx            = NULL;
 
-  ue_mm_context = amf_ue_context_exists_amf_ue_ngap_id(ue_id);
   if (!ue_mm_context) {
     OAILOG_WARNING(
         LOG_NAS_AMF, "Sending Auth Reject as UE MM Context is not found\n");
